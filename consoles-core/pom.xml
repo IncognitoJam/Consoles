@@ -104,6 +104,11 @@
             <version>1.0</version>
         </dependency>
         <dependency>
+            <groupId>com.github.incognitojam</groupId>
+            <artifactId>consoles-v1_12_R1</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>ca.jarcode</groupId>
             <artifactId>consoles-v1_8_R3</artifactId>
             <version>1.0</version>
