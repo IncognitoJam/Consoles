@@ -15,4 +15,7 @@ hs_err_pid*
 
 # pesky IntelliJ files (please add ignores for your IDE if you decide to commit)
 .idea
-.iml
+*.iml
+
+# build files
+target
