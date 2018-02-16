@@ -81,7 +81,7 @@ public class ConsoleButton extends ConsoleComponent
 	public void handleClick(int x, int y, Player player) {
 		if (!toggle || toggleable) {
 			toggle = !toggleable || !toggle;
-			player.getWorld().playSound(player.getLocation(), Sound.CLICK, 1.5f, 1f);
+			player.getWorld().playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.5f, 1f);
 			if (!toggleable)
 				doLater(() -> {
 					toggle = false;
