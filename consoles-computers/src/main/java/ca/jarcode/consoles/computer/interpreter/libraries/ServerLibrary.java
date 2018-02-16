@@ -157,6 +157,11 @@ public class ServerLibrary {
 
 		@Override
 		public void setOp(boolean b) {}
+
+		@Override
+		public Spigot spigot() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 	}
 	private class LuaCommandResult {
 		private StringBuilder text;
