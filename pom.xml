@@ -7,7 +7,7 @@
         <global.version.suffix/>
         <global.version>1.3</global.version>
         <!-- this is the latest spigot build, just for the API. NMS modules all use their own versions -->
-        <global.spigot.version>1.8.8-R0.1-SNAPSHOT</global.spigot.version>
+        <global.spigot.version>1.12.2-R0.1-SNAPSHOT</global.spigot.version>
     </properties>
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.jarcode</groupId>
@@ -23,6 +23,7 @@
         <module>consoles-nms-api</module>
         <module>consoles-v1_8_R3</module>
         <module>consoles-v1_8_R2</module>
+        <module>consoles-v1_12_R1</module>
     </modules>
 
     <repositories>
