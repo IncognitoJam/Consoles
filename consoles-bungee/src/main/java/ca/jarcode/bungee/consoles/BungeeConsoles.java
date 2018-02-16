@@ -10,33 +10,34 @@ import net.md_5.bungee.api.plugin.Plugin;
  */
 public class BungeeConsoles extends Plugin {
 
-	private static BungeeConsoles instance = null;
+    private static BungeeConsoles instance = null;
 
-	{
-		instance = this;
-	}
+    {
+        instance = this;
+    }
 
-	public ConsoleMessageHandler handler;
+    public ConsoleMessageHandler handler;
 
-	public static BungeeConsoles getInstance() {
-		return instance;
-	}
+    public static BungeeConsoles getInstance() {
+        return instance;
+    }
 
-	public void onEnable() {
-		handler = new ConsoleMessageHandler(this);
-		getProxy().getPluginManager().registerListener(this, handler);
-	}
+    public void onEnable() {
+        handler = new ConsoleMessageHandler(this);
+        getProxy().getPluginManager().registerListener(this, handler);
+    }
 
-	public ConsoleMessageHandler getMessageHandler() {
-		return handler;
-	}
+    public ConsoleMessageHandler getMessageHandler() {
+        return handler;
+    }
 
-	public static ProxiedPlayer getProxiedPlayer(Connection connection) {
-		for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-			if (connection.getAddress().equals(player.getAddress())) {
-				return player;
-			}
-		}
-		return null;
-	}
+    public static ProxiedPlayer getProxiedPlayer(Connection connection) {
+        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+            if (connection.getAddress().equals(player.getAddress())) {
+                return player;
+            }
+        }
+        return null;
+    }
+
 }

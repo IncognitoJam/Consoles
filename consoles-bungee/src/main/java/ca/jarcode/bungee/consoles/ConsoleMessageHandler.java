@@ -15,61 +15,65 @@ import java.util.function.Consumer;
 
 public class ConsoleMessageHandler implements Listener {
 
-	private final HashMap<String, Object> commands = new HashMap<>();
+    private final HashMap<String, Object> commands = new HashMap<>();
 
-	private final List<UUID> connected = new ArrayList<>();
+    private final List<UUID> connected = new ArrayList<>();
 
-	private HashMap<UUID, Consumer<Boolean>> consumers = new HashMap<>();
+    private HashMap<UUID, Consumer<Boolean>> consumers = new HashMap<>();
 
-	private Plugin plugin;
+    private Plugin plugin;
 
-	{
-		commands.put("clear", (OutgoingHookCommand) (player, args, out) -> {});
-	}
+    {
+        commands.put("clear", (OutgoingHookCommand) (player, args, out) -> {});
+    }
 
-	public ConsoleMessageHandler(Plugin plugin) {
-		this.plugin = plugin;
-		plugin.getProxy().registerChannel("Console");
-	}
+    public ConsoleMessageHandler(Plugin plugin) {
+        this.plugin = plugin;
+        plugin.getProxy().registerChannel("Console");
+    }
 
-	@EventHandler
-	@SuppressWarnings("unused")
-	public void onPluginMessage(PluginMessageEvent event) {
-		if (event.getTag().equals("Console")) {
-			ByteArrayDataInput input = ByteStreams.newDataInput(event.getData());
-			String command = input.readUTF();
-			System.out.println("received: " + command);
-			Object cmd = commands.get(command);
-			if (cmd != null && cmd instanceof IncomingHookCommand) {
-				((IncomingHookCommand) cmd).handle(BungeeConsoles.getProxiedPlayer(event.getReceiver()), input);
-			}
-		}
-	}
-	@EventHandler
-	@SuppressWarnings("unused")
-	public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-		connected.remove(event.getPlayer().getUniqueId());
-	}
-	@EventHandler
-	@SuppressWarnings("unused")
-	public void onPlayerConnect(final ServerConnectedEvent event) {
-		if (!connected.contains(event.getPlayer().getUniqueId())) {
-			connected.add(event.getPlayer().getUniqueId());
-			execute(event.getPlayer(), event.getServer(), "clear");
-		}
-	}
-	public boolean execute(ProxiedPlayer player, String command, Object... args) {
-		return execute(player, player.getServer(), command, args);
-	}
-	public boolean execute(ProxiedPlayer player, Server server, String command, Object... args) {
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		Object cmd = commands.get(command);
-		if (cmd != null && cmd instanceof OutgoingHookCommand) {
-			out.writeUTF(command);
-			((OutgoingHookCommand) cmd).handle(player, args, out);
-			server.sendData("Console", out.toByteArray());
-			return true;
-		}
-		else return false;
-	}
+    @EventHandler
+    @SuppressWarnings("unused")
+    public void onPluginMessage(PluginMessageEvent event) {
+        if (event.getTag().equals("Console")) {
+            ByteArrayDataInput input = ByteStreams.newDataInput(event.getData());
+            String command = input.readUTF();
+            System.out.println("received: " + command);
+            Object cmd = commands.get(command);
+            if (cmd != null && cmd instanceof IncomingHookCommand) {
+                ((IncomingHookCommand) cmd).handle(BungeeConsoles.getProxiedPlayer(event.getReceiver()), input);
+            }
+        }
+    }
+
+    @EventHandler
+    @SuppressWarnings("unused")
+    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+        connected.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    @SuppressWarnings("unused")
+    public void onPlayerConnect(final ServerConnectedEvent event) {
+        if (!connected.contains(event.getPlayer().getUniqueId())) {
+            connected.add(event.getPlayer().getUniqueId());
+            execute(event.getPlayer(), event.getServer(), "clear");
+        }
+    }
+
+    public boolean execute(ProxiedPlayer player, String command, Object... args) {
+        return execute(player, player.getServer(), command, args);
+    }
+
+    public boolean execute(ProxiedPlayer player, Server server, String command, Object... args) {
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        Object cmd = commands.get(command);
+        if (cmd != null && cmd instanceof OutgoingHookCommand) {
+            out.writeUTF(command);
+            ((OutgoingHookCommand) cmd).handle(player, args, out);
+            server.sendData("Console", out.toByteArray());
+            return true;
+        } else return false;
+    }
+
 }
