@@ -9,11 +9,14 @@
         <!-- this is the latest spigot build, just for the API. NMS modules all use their own versions -->
         <global.spigot.version>1.12.2-R0.1-SNAPSHOT</global.spigot.version>
     </properties>
+
+    <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>ca.jarcode</groupId>
     <artifactId>consoles</artifactId>
-    <packaging>pom</packaging>
     <version>1.0</version>
+
     <modules>
         <module>consoles-bungee</module>
         <module>consoles-core</module>
