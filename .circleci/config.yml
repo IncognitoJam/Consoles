@@ -1,0 +1,54 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+
+    environment:
+      MAVEN_OPTS: -Xmx3G
+      _JAVA_OPTIONS: "-Xms512M -Xmx1024M"
+
+    steps:
+      # download and checkout repository
+      - checkout
+
+
+      # download dependencies
+      - restore_cache:
+          keys:
+          - dependencies-{{ checksum "~/project/pom.xml" }}
+          - dependencies-
+      - run:
+          name: Build required Bukkit/Spigot versions and install to local maven repository
+          command: |
+            mkdir -p ~/BuildTools
+            cd ~/BuildTools
+            wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -O BuildTools.jar
+            for revision in `sed '/^$/d' ~/project/revisions.txt`; do
+              java -jar ./BuildTools.jar --rev $revision
+            done
+
+
+      # run build
+      - run: mvn clean install
+
+
+      # save the dependencies to the cache
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/BuildTools
+          key: dependencies-{{ checksum "~/project/pom.xml" }}
+
+
+      # copy artifacts to artifact directory
+      - run: |
+          mkdir ~/artifacts
+          find ~/project -iname '*.jar' -exec cp {} ~/artifacts \;
+      - store_artifacts:
+          path: ~/artifacts
+
