@@ -1,4 +1,11 @@
 # Consoles
+
+[![CircleCI](https://img.shields.io/circleci/project/github/IncognitoJam/Consoles.svg?style=for-the-badge)](https://circleci.com/gh/IncognitoJam/Consoles/tree/master)
+[![GitHub issues](https://img.shields.io/github/issues/IncognitoJam/Consoles.svg?style=for-the-badge)](https://github.com/IncognitoJam/Consoles/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/IncognitoJam/Consoles.svg?style=for-the-badge)](https://github.com/IncognitoJam/Consoles/pulls)
+[![GitHub forks](https://img.shields.io/github/forks/IncognitoJam/Consoles.svg?style=for-the-badge)](https://github.com/IncognitoJam/Consoles/network)
+[![GitHub stars](https://img.shields.io/github/stars/IncognitoJam/Consoles.svg?style=for-the-badge)](https://github.com/IncognitoJam/Consoles/stargazers)
+
 A powerful set of plugins that provides programmable computers and a powerful map rendering API for craftbukkit and spigot servers. **Requires Java 8!**
 
 ### Licensing
