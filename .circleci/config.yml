@@ -29,7 +29,10 @@ jobs:
             cd ~/BuildTools
             wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -O BuildTools.jar
             for revision in `sed '/^$/d' ~/project/revisions.txt`; do
-              java -jar ./BuildTools.jar --rev $revision
+              if [ ! -f "./spigot-$revision.jar" ]; then
+                echo "Revision $revision has not been built before, building!"
+                java -jar ./BuildTools.jar --rev $revision
+              fi
             done
 
 
