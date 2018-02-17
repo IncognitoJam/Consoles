@@ -5,30 +5,29 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.*;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class ConsoleMessageHandler implements Listener {
 
     private final HashMap<String, Object> commands = new HashMap<>();
-
     private final List<UUID> connected = new ArrayList<>();
 
-    private HashMap<UUID, Consumer<Boolean>> consumers = new HashMap<>();
-
-    private Plugin plugin;
-
     {
-        commands.put("clear", (OutgoingHookCommand) (player, args, out) -> {});
+        commands.put("clear", (OutgoingHookCommand) (player, args, out) -> {
+        });
     }
 
-    public ConsoleMessageHandler(Plugin plugin) {
-        this.plugin = plugin;
+    ConsoleMessageHandler(Plugin plugin) {
         plugin.getProxy().registerChannel("Console");
     }
 
@@ -40,7 +39,7 @@ public class ConsoleMessageHandler implements Listener {
             String command = input.readUTF();
             System.out.println("received: " + command);
             Object cmd = commands.get(command);
-            if (cmd != null && cmd instanceof IncomingHookCommand) {
+            if (cmd instanceof IncomingHookCommand) {
                 ((IncomingHookCommand) cmd).handle(BungeeConsoles.getProxiedPlayer(event.getReceiver()), input);
             }
         }
@@ -65,10 +64,10 @@ public class ConsoleMessageHandler implements Listener {
         return execute(player, player.getServer(), command, args);
     }
 
-    public boolean execute(ProxiedPlayer player, Server server, String command, Object... args) {
+    private boolean execute(ProxiedPlayer player, Server server, String command, Object... args) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         Object cmd = commands.get(command);
-        if (cmd != null && cmd instanceof OutgoingHookCommand) {
+        if (cmd instanceof OutgoingHookCommand) {
             out.writeUTF(command);
             ((OutgoingHookCommand) cmd).handle(player, args, out);
             server.sendData("Console", out.toByteArray());

@@ -16,7 +16,7 @@ public class BungeeConsoles extends Plugin {
         instance = this;
     }
 
-    public ConsoleMessageHandler handler;
+    private ConsoleMessageHandler handler;
 
     public static BungeeConsoles getInstance() {
         return instance;
