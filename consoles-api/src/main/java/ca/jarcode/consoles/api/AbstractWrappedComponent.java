@@ -7,20 +7,21 @@ package ca.jarcode.consoles.api;
  */
 abstract class AbstractWrappedComponent<T> implements CanvasComponent, WrappedComponent, CanvasPainter, PreparedComponent {
 
-	protected T underlying = null;
+    protected T underlying = null;
 
-	protected int w, h;
+    protected int w, h;
 
-	public AbstractWrappedComponent(int w, int h) {
-		this.w = w;
-		this.h = h;
-	}
+    public AbstractWrappedComponent(int w, int h) {
+        this.w = w;
+        this.h = h;
+    }
 
-	/**
-	 * Builds the type of component that this class is wrapping, with the given renderer
-	 *
-	 * @param renderer the renderer to build the component against
-	 * @return an instance of this component's type
-	 */
-	public abstract T build(Canvas renderer);
+    /**
+     * Builds the type of component that this class is wrapping, with the given renderer
+     *
+     * @param renderer the renderer to build the component against
+     * @return an instance of this component's type
+     */
+    public abstract T build(Canvas renderer);
+
 }

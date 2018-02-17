@@ -5,10 +5,12 @@ package ca.jarcode.consoles.api;
  */
 @FunctionalInterface
 public interface WrappedComponent {
-	/**
-	 * Obtain the wrapped component
-	 *
-	 * @return the underlying internal component
-	 */
-	Object underlying();
+
+    /**
+     * Obtain the wrapped component
+     *
+     * @return the underlying internal component
+     */
+    Object underlying();
+
 }

@@ -5,13 +5,15 @@ package ca.jarcode.consoles.api;
  */
 @FunctionalInterface
 public interface CanvasPainter {
-	/**
-	 * Paints this component with the given context and graphics instance.
-	 * Painting is threaded, so it is unsafe to call functionality from the
-	 * Bukkit API.
-	 *
-	 * @param g the graphics instance
-	 * @param context the context (player) to paint for
-	 */
-	void paint(CanvasGraphics g, String context);
+
+    /**
+     * Paints this component with the given context and graphics instance.
+     * Painting is threaded, so it is unsafe to call functionality from the
+     * Bukkit API.
+     *
+     * @param g       the graphics instance
+     * @param context the context (player) to paint for
+     */
+    void paint(CanvasGraphics g, String context);
+
 }

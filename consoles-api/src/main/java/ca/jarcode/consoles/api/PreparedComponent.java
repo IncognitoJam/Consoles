@@ -6,10 +6,12 @@ package ca.jarcode.consoles.api;
  */
 @FunctionalInterface
 public interface PreparedComponent {
-	/**
-	 * Prepares and builds the underlying component
-	 *
-	 * @param renderer the renderer to build against.
-	 */
-	void prepare(Canvas renderer);
+
+    /**
+     * Prepares and builds the underlying component
+     *
+     * @param renderer the renderer to build against.
+     */
+    void prepare(Canvas renderer);
+
 }
