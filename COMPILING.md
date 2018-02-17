@@ -8,6 +8,8 @@
 
 	- 1.8.8-R0.1-SNAPSHOT (v1_8_R3)
 
+	- 1.12.2-R0.1-SNAPSHOT (v1_12_R1)
+
 - You need a maven installation. BuildTools will download one for itself, you can simply add its maven directory to your system path, or install maven normally (on most Linux distributions, you can run `apt-get install maven2`)
 
 ### Natives
@@ -41,4 +43,3 @@ If you're not compiling on Linux, you're going to need to be willing to spend a 
  - on OSX, you'll probably want homebrew installed so you can easily grab libffi6 and luajit
 
 You'll also need to modify the `pom.xml` file for `consoles-computers` to reflect the platform you're trying to build for. Edit the configurations for `gcc-maven-plugin` with the proper parameters and `<targetPlatforms>` entries. For OSX, you should simply need to change the target to `OSX`, and on Windows you'll need to add `WIN32`/`WIN64` and change multiple parameters so the right include directories are added, and the correct libraries are linked against.
-
