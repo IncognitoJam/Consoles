@@ -48,7 +48,10 @@ jobs:
       # copy artifacts to artifact directory
       - run: |
           mkdir ~/artifacts
-          find ~/project -iname '*.jar' -exec cp {} ~/artifacts \;
+          cp ./consoles-core/target/final/*.jar ~/artifacts/
+          cp ./consoles-api/target/*.jar ~/artifacts/
+          cp ./consoles-bungee/target/*.jar ~/artifacts/
+          cp ./consoles-computers/target/final/*.jar ~/artifacts/
       - store_artifacts:
           path: ~/artifacts
 
