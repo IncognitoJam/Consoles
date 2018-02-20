@@ -8,81 +8,93 @@ import ca.jarcode.ascript.Script;
  */
 public interface ScriptValue {
 
-	default Object toJava() {
-		if (canTranslateBoolean())
-			return translateBoolean();
-		else if (canTranslateDouble())
-			return translateDouble();
-		else if (canTranslateString())
-			return translateString();
-		else if (isFunction())
-			return Script.javaFunction(this);
-		else if (isNull())
-			return null;
-		else if (canTranslateArray())
-			return translateArray(Object[].class);
-		else if (canTranslateObj())
-			return translateObj();
-		else throw new RuntimeException("Could not assume type");
-	}
+    default Object toJava() {
+        if (canTranslateBoolean())
+            return translateBoolean();
+        else if (canTranslateDouble())
+            return translateDouble();
+        else if (canTranslateString())
+            return translateString();
+        else if (isFunction())
+            return Script.javaFunction(this);
+        else if (isNull())
+            return null;
+        else if (canTranslateArray())
+            return translateArray(Object[].class);
+        else if (canTranslateObj())
+            return translateObj();
+        else throw new RuntimeException("Could not assume type");
+    }
 
-	Object translateObj();
-	boolean canTranslateObj();
+    Object translateObj();
 
-	String translateString();
-	boolean canTranslateString();
+    boolean canTranslateObj();
 
-	long translateLong();
-	boolean canTranslateLong();
+    String translateString();
 
-	short translateShort();
-	boolean canTranslateShort();
+    boolean canTranslateString();
 
-	byte translateByte();
-	boolean canTranslateByte();
+    long translateLong();
 
-	int translateInt();
-	boolean canTranslateInt();
+    boolean canTranslateLong();
 
-	float translateFloat();
-	boolean canTranslateFloat();
+    short translateShort();
 
-	double translateDouble();
-	boolean canTranslateDouble();
+    boolean canTranslateShort();
 
-	boolean translateBoolean();
-	boolean canTranslateBoolean();
+    byte translateByte();
 
-	boolean isNull();
+    boolean canTranslateByte();
 
-	boolean canTranslateArray();
-	Object translateArray(Class arrClass);
+    int translateInt();
 
-	boolean isFunction();
-	ScriptFunction getAsFunction();
+    boolean canTranslateInt();
 
-	void set(ScriptValue key, ScriptValue value);
+    float translateFloat();
 
-	ScriptValue get(ScriptValue key);
+    boolean canTranslateFloat();
 
-	ScriptValue call();
+    double translateDouble();
 
-	/**
-	 * <p>Frees resources from the value. After releasing the value, it is considered to be 'dead',
-	 * and should not be used afterwards. Releasing the value should not affect any underlying
-	 * or counterpart lua values that this object copies or wraps, it should only prevent
-	 * this object from being further used.</p>
-	 *
-	 * <p>Implementations of this method may be left blank if this value has nothing to free.</p>
-	 *
-	 * <p>After use of a value in a function, library, or type, the value should be released.</p>
-	 */
-	void release();
+    boolean canTranslateDouble();
 
-	/**
-	 * Copies the value, such that if the original value is released, this copy of the value will remain.
-	 *
-	 * @return a copy of this value
-	 */
-	ScriptValue copy();
+    boolean translateBoolean();
+
+    boolean canTranslateBoolean();
+
+    boolean isNull();
+
+    boolean canTranslateArray();
+
+    Object translateArray(Class arrClass);
+
+    boolean isFunction();
+
+    ScriptFunction getAsFunction();
+
+    void set(ScriptValue key, ScriptValue value);
+
+    ScriptValue get(ScriptValue key);
+
+    ScriptValue call();
+
+    /**
+     * <p>Frees resources from the value. After releasing the value, it is considered to be 'dead',
+     * and should not be used afterwards. Releasing the value should not affect any underlying
+     * or counterpart lua values that this object copies or wraps, it should only prevent
+     * this object from being further used.</p>
+     * <p>
+     * <p>Implementations of this method may be left blank if this value has nothing to free.</p>
+     * <p>
+     * <p>After use of a value in a function, library, or type, the value should be released.</p>
+     */
+    void release();
+
+    /**
+     * Copies the value, such that if the original value is released, this copy of the value will remain.
+     *
+     * @return a copy of this value
+     */
+    ScriptValue copy();
+
 }

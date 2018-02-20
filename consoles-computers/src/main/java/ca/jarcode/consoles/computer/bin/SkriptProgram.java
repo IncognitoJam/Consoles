@@ -5,21 +5,20 @@ import ca.jarcode.consoles.computer.filesystem.FSProvidedProgram;
 import ca.jarcode.consoles.computer.manual.ProvidedManual;
 
 @ProvidedManual(
-		author = "Jarcode",
-		version = "1.0",
-		contents = "Uploads the contents of a file to Skript, if the plugin exists. This action " +
-				"will need to be authorized by a user with the permission \u00A7ecomputer.skript.upload\n\n" +
-				"The program will need to be provided with a file in the computer (with the skript), and an " +
-				"identifier for the script. If a script already exists with the given identifier, it will be " +
-				"overwritten.\n\nSkript is no longer supported in Consoles version 1.8-beta and higher"
+        author = "Jarcode",
+        contents = "Uploads the contents of a file to Skript, if the plugin exists. This action " +
+                "will need to be authorized by a user with the permission \u00A7ecomputer.skript.upload\n\n" +
+                "The program will need to be provided with a file in the computer (with the skript), and an " +
+                "identifier for the script. If a script already exists with the given identifier, it will be " +
+                "overwritten.\n\nSkript is no longer supported in Consoles version 1.8-beta and higher"
 )
 @SuppressWarnings("SpellCheckingInspection")
-
 @Deprecated
 public class SkriptProgram extends FSProvidedProgram {
-	@Override
-	public void run(String str, Computer computer) throws Exception {
-		print("skript is no longer supported in Consoles version 1.8-beta and higher");
+
+    @Override
+    public void run(String str, Computer computer) throws Exception {
+        print("skript is no longer supported in Consoles version 1.8-beta and higher");
 		/*
 		String[] args = splitArguments(str);
 		if (args.length <= 1 || str.isEmpty()) {
@@ -105,5 +104,6 @@ public class SkriptProgram extends FSProvidedProgram {
 				break;
 		}
 		*/
-	}
+    }
+
 }

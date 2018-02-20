@@ -5,17 +5,18 @@ import ca.jarcode.consoles.computer.Computer;
 @SuppressWarnings("unused")
 public class LuaPainter {
 
-	private final Computer computer;
-	private final int index;
+    private final Computer computer;
+    private final int index;
 
-	public LuaPainter(int index, Computer computer) {
-		this.index = index;
-		this.computer = computer;
-	}
+    public LuaPainter(int index, Computer computer) {
+        this.index = index;
+        this.computer = computer;
+    }
 
-	public void repaint() {
-		if (computer.getComponentIndex() == index) {
-			computer.getConsole().repaint();
-		}
-	}
+    public void repaint() {
+        if (computer.getComponentIndex() == index) {
+            computer.getConsole().repaint();
+        }
+    }
+
 }

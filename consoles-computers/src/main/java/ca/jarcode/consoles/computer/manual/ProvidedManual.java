@@ -8,7 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ProvidedManual {
-	String author() default "?";
-	String version() default "1.0";
-	String contents() default "";
+
+    String author() default "?";
+    String version() default "1.0";
+    String contents() default "";
+
 }

@@ -11,86 +11,87 @@ import java.net.Socket;
 import java.net.URL;
 
 public class NetLibrary {
-	public Socket newSocket(String host, Integer port) throws IOException {
-		return new Socket(host, port);
-	}
-	public HTTPResponse httpGET(String url) throws IOException {
-		HttpURLConnection con = buildConnection(url);
 
-		int response = con.getResponseCode();
-		String data = "";
-		HTTPResponse res = new HTTPResponse(response);
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			data = IOUtils.toString(reader);
-			reader.close();
-		}
-		catch (IOException e) {
-			res.exception = e.getClass().getSimpleName() + ": " + e.getMessage();
-		}
-		finally {
-			res.data = data;
-		}
+    public Socket newSocket(String host, Integer port) throws IOException {
+        return new Socket(host, port);
+    }
 
-		return res;
-	}
-	private HttpURLConnection buildConnection(String url) throws IOException {
+    public HTTPResponse httpGET(String url) throws IOException {
+        HttpURLConnection con = buildConnection(url);
 
-		URL link = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) link.openConnection();
+        int response = con.getResponseCode();
+        String data = "";
+        HTTPResponse res = new HTTPResponse(response);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            data = IOUtils.toString(reader);
+            reader.close();
+        } catch (IOException e) {
+            res.exception = e.getClass().getSimpleName() + ": " + e.getMessage();
+        } finally {
+            res.data = data;
+        }
 
-		con.setRequestMethod("POST");
-		con.setRequestProperty("User-Agent", "Mozilla/5.0");
-		return con;
-	}
-	public HTTPResponse httpPOST(String url, String parameters) throws IOException {
+        return res;
+    }
 
-		HttpURLConnection con = buildConnection(url);
+    private HttpURLConnection buildConnection(String url) throws IOException {
+        URL link = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) link.openConnection();
 
-		con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        return con;
+    }
 
-		con.setDoOutput(true);
-		DataOutputStream out = new DataOutputStream(con.getOutputStream());
-		out.writeBytes(parameters);
-		out.flush();
-		out.close();
+    public HTTPResponse httpPOST(String url, String parameters) throws IOException {
+        HttpURLConnection con = buildConnection(url);
 
-		int response = con.getResponseCode();
-		HTTPResponse res = new HTTPResponse(response);
-		String data = "";
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			data = IOUtils.toString(reader);
-			reader.close();
-		}
-		catch (IOException e) {
-			res.exception = e.getClass().getSimpleName() + ": " + e.getMessage();
-		}
-		finally {
-			res.data = data;
-		}
-		return res;
-	}
-	public class HTTPResponse {
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-		private final int response;
-		private String data;
-		private String exception = null;
+        con.setDoOutput(true);
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.writeBytes(parameters);
+        out.flush();
+        out.close();
 
-		public HTTPResponse(int response) {
-			this.response = response;
-		}
+        int response = con.getResponseCode();
+        HTTPResponse res = new HTTPResponse(response);
+        String data = "";
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            data = IOUtils.toString(reader);
+            reader.close();
+        } catch (IOException e) {
+            res.exception = e.getClass().getSimpleName() + ": " + e.getMessage();
+        } finally {
+            res.data = data;
+        }
+        return res;
+    }
 
-		public String getData() {
-			return data;
-		}
+    public class HTTPResponse {
 
-		public int getResponse() {
-			return response;
-		}
+        private final int response;
+        private String data;
+        private String exception = null;
 
-		public String getException() {
-			return exception;
-		}
-	}
+        public HTTPResponse(int response) {
+            this.response = response;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public int getResponse() {
+            return response;
+        }
+
+        public String getException() {
+            return exception;
+        }
+
+    }
+
 }

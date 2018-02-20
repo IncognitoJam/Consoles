@@ -3,9 +3,6 @@ package ca.jarcode.ascript.luanative;
 import ca.jarcode.ascript.interfaces.ScriptFunction;
 import ca.jarcode.ascript.interfaces.ScriptValue;
 
-import java.util.*;
-import java.util.stream.*;
-
 public class LuaNScriptValue extends LuaNObject implements ScriptValue, ScriptFunction {
 
 	/*
@@ -21,45 +18,76 @@ public class LuaNScriptValue extends LuaNObject implements ScriptValue, ScriptFu
 	/*
 	  this constructor is private, but it's called from native code.
 	*/
-	
-	private LuaNScriptValue(long size, long referenceStackSize) {
-		super(size, referenceStackSize);
-	}
 
-	public native Object translateObj();
-	public native boolean canTranslateObj();
-	public native String translateString();
-	public native boolean canTranslateString();
-	public native long translateLong();
-	public native boolean canTranslateLong();
-	public native short translateShort();
-	public native boolean canTranslateShort();
-	public native byte translateByte();
-	public native boolean canTranslateByte();
-	public native int translateInt();
-	public native boolean canTranslateInt();
-	public native float translateFloat();
-	public native boolean canTranslateFloat();
-	public native double translateDouble();
-	public native boolean canTranslateDouble();
-	public native boolean translateBoolean();
-	public native boolean canTranslateBoolean();
-	public native boolean isNull();
-	public native boolean canTranslateArray();
-	public native Object translateArray(Class arrClass);
-	public native boolean isFunction();
-	public native void set(ScriptValue key, ScriptValue value);
-	public native ScriptValue get(ScriptValue key);
-	public native ScriptValue call();
-	public native ScriptValue copy();
-	public native ScriptValue call(ScriptValue... args);
+    private LuaNScriptValue(long size, long referenceStackSize) {
+        super(size, referenceStackSize);
+    }
 
-	// this can be a value or a function, so just return the same object
-	public ScriptValue getAsValue() { return this; }
-	public ScriptFunction getAsFunction() { return this; }
-	
-	public void release() {
-		// this implementation does nothing on release (should get JIT'd to a no-op)
-	}
+    public native Object translateObj();
+
+    public native boolean canTranslateObj();
+
+    public native String translateString();
+
+    public native boolean canTranslateString();
+
+    public native long translateLong();
+
+    public native boolean canTranslateLong();
+
+    public native short translateShort();
+
+    public native boolean canTranslateShort();
+
+    public native byte translateByte();
+
+    public native boolean canTranslateByte();
+
+    public native int translateInt();
+
+    public native boolean canTranslateInt();
+
+    public native float translateFloat();
+
+    public native boolean canTranslateFloat();
+
+    public native double translateDouble();
+
+    public native boolean canTranslateDouble();
+
+    public native boolean translateBoolean();
+
+    public native boolean canTranslateBoolean();
+
+    public native boolean isNull();
+
+    public native boolean canTranslateArray();
+
+    public native Object translateArray(Class arrClass);
+
+    public native boolean isFunction();
+
+    public native void set(ScriptValue key, ScriptValue value);
+
+    public native ScriptValue get(ScriptValue key);
+
+    public native ScriptValue call();
+
+    public native ScriptValue copy();
+
+    public native ScriptValue call(ScriptValue... args);
+
+    // this can be a value or a function, so just return the same object
+    public ScriptValue getAsValue() {
+        return this;
+    }
+
+    public ScriptFunction getAsFunction() {
+        return this;
+    }
+
+    public void release() {
+        // this implementation does nothing on release (should get JIT'd to a no-op)
+    }
 
 }

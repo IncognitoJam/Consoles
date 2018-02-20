@@ -56,159 +56,177 @@ of this trick for deserializing java types when we encounter a field with generi
  */
 public class JointDefaults {
 
-	private static class map {
+    private static class map {
 
-		public static boolean _RESTRICT = true;
+        public static boolean _RESTRICT = true;
 
-		class WrappedMap<K, V> {
-			final Map<K, V> map;
-			final Class<K> key;
-			final Class<V> value;
-			public WrappedMap(Map<K, V> map, Class<K> key, Class<V> value) {
-				this.map = map;
-				this.key = key;
-				this.value = value;
-			}
-			public void clear() {
-				map.clear();
-			}
-			@SuppressWarnings("unchecked")
-			public void put(ScriptValue key, ScriptValue value) {
-				map.put(
-						(K) Script.translateAndRelease(this.key, key),
-						(V) Script.translateAndRelease(this.value, value)
-				);
-			}
-			@SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
-			public Object get(ScriptValue key) {
-				return map.get(Script.translateAndRelease(this.key, key));
-			}
+        class WrappedMap<K, V> {
 
-			public int size() {
-				return map.size();
-			}
+            final Map<K, V> map;
+            final Class<K> key;
+            final Class<V> value;
 
-			public Map unwrap() {
-				return map;
-			}
-		}
+            public WrappedMap(Map<K, V> map, Class<K> key, Class<V> value) {
+                this.map = map;
+                this.key = key;
+                this.value = value;
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap wrap(Map map, Class keyType, Class valueType) {
-			return new WrappedMap<>(map, keyType, valueType);
-		}
+            public void clear() {
+                map.clear();
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap hashMap(Class keyType, Class valueType) {
-			return new WrappedMap(new HashMap<>(), keyType, valueType);
-		}
+            @SuppressWarnings("unchecked")
+            public void put(ScriptValue key, ScriptValue value) {
+                map.put(
+                        (K) Script.translateAndRelease(this.key, key),
+                        (V) Script.translateAndRelease(this.value, value)
+                );
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap linkedHashMap(Class keyType, Class valueType) {
-			return new WrappedMap(new LinkedHashMap<>(), keyType, valueType);
-		}
+            @SuppressWarnings({ "unchecked", "SuspiciousMethodCalls" })
+            public Object get(ScriptValue key) {
+                return map.get(Script.translateAndRelease(this.key, key));
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap treeMap(Class keyType, Class valueType) {
-			return new WrappedMap(new TreeMap<>(), keyType, valueType);
-		}
+            public int size() {
+                return map.size();
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap linkedTreeMap(Class keyType, Class valueType) {
-			return new WrappedMap(new LinkedTreeMap<>(), keyType, valueType);
-		}
+            public Map unwrap() {
+                return map;
+            }
 
-		@SuppressWarnings("unchecked")
-		public WrappedMap newMap(Class<? extends Map> mapType, Class keyType, Class valueType) {
-			try {
-				return new WrappedMap(mapType.newInstance(), keyType, valueType);
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new Error(e);
-			}
-		}
-	}
+        }
 
-	private static class list {
+        @SuppressWarnings("unchecked")
+        public WrappedMap wrap(Map map, Class keyType, Class valueType) {
+            return new WrappedMap<>(map, keyType, valueType);
+        }
 
-		public static boolean _RESTRICT = true;
+        @SuppressWarnings("unchecked")
+        public WrappedMap hashMap(Class keyType, Class valueType) {
+            return new WrappedMap(new HashMap<>(), keyType, valueType);
+        }
 
-		class WrappedList<V> {
-			final List<V> list;
-			final Class<V> value;
-			public WrappedList(List<V> list, Class<V> value) {
-				this.list = list;
-				this.value = value;
-			}
-			public void clear() {
-				list.clear();
-			}
-			@SuppressWarnings("unchecked")
-			public void set(int idx, ScriptValue element) {
-				list.set(idx, (V) Script.translateAndRelease(value, element));
-			}
-			@SuppressWarnings("unchecked")
-			public boolean add(ScriptValue element) {
-				return list.add((V) Script.translateAndRelease(value, element));
-			}
-			public Object get(int index) {
-				return list.get(index);
-			}
-			public int size() {
-				return list.size();
-			}
-			public List unwrap() {
-				return list;
-			}
-		}
-	}
+        @SuppressWarnings("unchecked")
+        public WrappedMap linkedHashMap(Class keyType, Class valueType) {
+            return new WrappedMap(new LinkedHashMap<>(), keyType, valueType);
+        }
 
-	// This gives scripts access to Java types directly
+        @SuppressWarnings("unchecked")
+        public WrappedMap treeMap(Class keyType, Class valueType) {
+            return new WrappedMap(new TreeMap<>(), keyType, valueType);
+        }
 
-	private static class types {
+        @SuppressWarnings("unchecked")
+        public WrappedMap linkedTreeMap(Class keyType, Class valueType) {
+            return new WrappedMap(new LinkedTreeMap<>(), keyType, valueType);
+        }
 
-		public static boolean _RESTRICT = true;
+        @SuppressWarnings("unchecked")
+        public WrappedMap newMap(Class<? extends Map> mapType, Class keyType, Class valueType) {
+            try {
+                return new WrappedMap(mapType.newInstance(), keyType, valueType);
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new Error(e);
+            }
+        }
 
-		public Class find(String path) {
-			try {
-				if (path.equals("int"))
-					path = "integer";
-				switch (path.toLowerCase()) {
-					case "string":
-					case "object":
-					case "integer":
-					case "double":
-					case "float":
-					case "boolean":
-					case "long":
-					case "short":
-					case "byte":
-						char[] arr = path.toCharArray();
-						arr[0] = Character.toUpperCase(arr[0]);
-						path = "java.lang." + new String(arr);
-				}
-				return Class.forName(path);
-			} catch (ClassNotFoundException e) {
-				throw new Error(e);
-			}
-		}
-	}
+    }
 
-	@SuppressWarnings("unchecked")
-	public static void load(String module) throws GenericScriptError {
-		try {
-			module = module.toLowerCase();
-			Class type = Class.forName(JointDefaults.class.getName() + '$' + module);
-			boolean restrict = type.getField("_RESTRICT").getBoolean(null);
-			LibraryCreator.link(type, () -> {
-				try {
-					return type.newInstance();
-				}
-				catch (IllegalAccessException | InstantiationException e) {
-					throw new GenericScriptError(e);
-				}
-			}, module, restrict);
-		} catch (Exception e) {
-			throw new GenericScriptError(e);
-		}
-	}
+    private static class list {
+
+        public static boolean _RESTRICT = true;
+
+        class WrappedList<V> {
+
+            final List<V> list;
+            final Class<V> value;
+
+            public WrappedList(List<V> list, Class<V> value) {
+                this.list = list;
+                this.value = value;
+            }
+
+            public void clear() {
+                list.clear();
+            }
+
+            @SuppressWarnings("unchecked")
+            public void set(int idx, ScriptValue element) {
+                list.set(idx, (V) Script.translateAndRelease(value, element));
+            }
+
+            @SuppressWarnings("unchecked")
+            public boolean add(ScriptValue element) {
+                return list.add((V) Script.translateAndRelease(value, element));
+            }
+
+            public Object get(int index) {
+                return list.get(index);
+            }
+
+            public int size() {
+                return list.size();
+            }
+
+            public List unwrap() {
+                return list;
+            }
+
+        }
+
+    }
+
+    // This gives scripts access to Java types directly
+
+    private static class types {
+
+        public static boolean _RESTRICT = true;
+
+        public Class find(String path) {
+            try {
+                if (path.equals("int"))
+                    path = "integer";
+                switch (path.toLowerCase()) {
+                    case "string":
+                    case "object":
+                    case "integer":
+                    case "double":
+                    case "float":
+                    case "boolean":
+                    case "long":
+                    case "short":
+                    case "byte":
+                        char[] arr = path.toCharArray();
+                        arr[0] = Character.toUpperCase(arr[0]);
+                        path = "java.lang." + new String(arr);
+                }
+                return Class.forName(path);
+            } catch (ClassNotFoundException e) {
+                throw new Error(e);
+            }
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void load(String module) throws GenericScriptError {
+        try {
+            module = module.toLowerCase();
+            Class type = Class.forName(JointDefaults.class.getName() + '$' + module);
+            boolean restrict = type.getField("_RESTRICT").getBoolean(null);
+            LibraryCreator.link(type, () -> {
+                try {
+                    return type.newInstance();
+                } catch (IllegalAccessException | InstantiationException e) {
+                    throw new GenericScriptError(e);
+                }
+            }, module, restrict);
+        } catch (Exception e) {
+            throw new GenericScriptError(e);
+        }
+    }
+
 }

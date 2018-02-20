@@ -11,31 +11,31 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public class LuaComputer {
 
-	private Computer computer;
+    private Computer computer;
 
-	public LuaComputer(Computer computer) {
-		this.computer = computer;
-	}
+    public LuaComputer(Computer computer) {
+        this.computer = computer;
+    }
 
-	@FunctionManual("Sends a raw message to this computer on the given channel.")
-	public boolean message(
-			@Arg(name = "channel", info = "the name of the channel to use") String channel,
-			@Arg(name = "message", info = "the contents of the message to send") String message) {
-		Consumer<String> listener = computer.getMessageListener(channel);
-		if (listener != null) {
-			listener.accept(message);
-			return true;
-		}
-		else return false;
-	}
+    @FunctionManual("Sends a raw message to this computer on the given channel.")
+    public boolean message(
+            @Arg(name = "channel", info = "the name of the channel to use") String channel,
+            @Arg(name = "message", info = "the contents of the message to send") String message) {
+        Consumer<String> listener = computer.getMessageListener(channel);
+        if (listener != null) {
+            listener.accept(message);
+            return true;
+        } else return false;
+    }
 
-	@FunctionManual("Returns the hostname of this computer as a string.")
-	public String hostname() {
-		return computer.getHostname();
-	}
+    @FunctionManual("Returns the hostname of this computer as a string.")
+    public String hostname() {
+        return computer.getHostname();
+    }
 
-	@FunctionManual("Returns the owner of this computer, as a UUID string.")
-	public String owner() {
-		return computer.getOwner().toString();
-	}
+    @FunctionManual("Returns the owner of this computer, as a UUID string.")
+    public String owner() {
+        return computer.getOwner().toString();
+    }
+
 }

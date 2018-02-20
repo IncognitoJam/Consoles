@@ -9,10 +9,12 @@ import java.util.function.BooleanSupplier;
 @SuppressWarnings("unchecked")
 public class ScriptContext {
 
-	public static Computer getComputer() {
-		return ((FuncPool<SandboxProgram>) Script.contextPool()).getUserdatum().getComputer();
-	}
-	public static BooleanSupplier terminatedSupplier() {
-		return ((FuncPool<SandboxProgram>) Script.contextPool()).getUserdatum().terminated;
-	}
+    public static Computer getComputer() {
+        return ((FuncPool<SandboxProgram>) Script.contextPool()).getUserdatum().getComputer();
+    }
+
+    public static BooleanSupplier terminatedSupplier() {
+        return ((FuncPool<SandboxProgram>) Script.contextPool()).getUserdatum().terminated;
+    }
+
 }

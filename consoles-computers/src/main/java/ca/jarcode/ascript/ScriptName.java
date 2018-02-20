@@ -12,12 +12,14 @@ import java.lang.annotation.Target;
  * @see LibraryCreator
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD})
+@Target({ ElementType.METHOD, ElementType.FIELD })
 public @interface ScriptName {
-	/**
-	 * Returns the name of the resulting Lua function for this method
-	 *
-	 * @return the name of the lua function
-	 */
-	String name() default "?";
+
+    /**
+     * Returns the name of the resulting Lua function for this method
+     *
+     * @return the name of the lua function
+     */
+    String name() default "?";
+
 }

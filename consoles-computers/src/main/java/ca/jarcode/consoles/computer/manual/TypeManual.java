@@ -7,8 +7,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-
 public @interface TypeManual {
-	String value();
-	String usage() default "?";
+
+    String value();
+    String usage() default "?";
+
 }

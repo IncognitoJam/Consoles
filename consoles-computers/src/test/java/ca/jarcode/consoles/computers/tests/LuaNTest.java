@@ -4,82 +4,68 @@ import ca.jarcode.ascript.luanative.LuaNEngine;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.*;
-import java.util.*;
-
-import ca.jarcode.ascript.luanative.*;
 
 public class LuaNTest {
-	@Test
-	public void test() throws Throwable {
-		
-		NativeLayerTask task = new NativeLayerTask();
-		task.init(false, true);
-		task.loadAndCallChunk("tests");
-		task.loadAndCallTests(true);
-		if (LuaNScriptValue.TRACK_INSTANCES) {
-			String list = Arrays.asList(LuaNScriptValue.remainingContextValues(0)).stream()
-				.map((value) -> NativeLayerTask.valueString(value))
-				.collect(Collectors.joining(", "));
-			System.out.println("unmanaged values:\n " + list);
-			list = Arrays.asList(LuaNScriptValue.remainingContextValues(task.getEngineAddress())).stream()
-				.map((value) -> NativeLayerTask.valueString(value))
-				.collect(Collectors.joining(", "));
-			System.out.printf("instance values (%x):\n " + list + "\n", task.getEngineAddress());
-		}
-		task.cleanup();
 
-		task = new NativeLayerTask();
-		task.init(true, false);
+    @Test
+    public void test() throws Throwable {
+        NativeLayerTask task = new NativeLayerTask();
+        task.init(false, true);
+        task.loadAndCallChunk("tests");
+        task.loadAndCallTests(true);
+        task.cleanup();
 
-		LuaNEngine.ENGINE_INTERFACE.setmaxtime(1500);
+        task = new NativeLayerTask();
+        task.init(true, false);
 
-		task.loadAndCallChunk("sandbox_test");
-		try {
-			task.loadAndCallTests(false);
-		}
-		// we're going to get an error after letting the script die.
-		catch (Throwable ignored) {}
-		task.cleanup();
+        LuaNEngine.ENGINE_INTERFACE.setmaxtime(1500);
 
-		LuaNEngine.ENGINE_INTERFACE.setmaxtime(7000);
+        task.loadAndCallChunk("sandbox_test");
+        try {
+            task.loadAndCallTests(false);
+        }
+        // we're going to get an error after letting the script die.
+        catch (Throwable ignored) {
+        }
+        task.cleanup();
 
-		AtomicReference<Throwable> ref = new AtomicReference<>();
-		Thread thread = new Thread(() -> {
-			try {
-				NativeLayerTask threadTask = new NativeLayerTask();
-				threadTask.init(false, false);
-				threadTask.loadAndCallChunk("tests");
-				threadTask.loadAndCallTests(true);
-				threadTask.cleanup();
-				threadTask.cleanupThreadContext();
-			}
-			catch (Throwable e) {
-				ref.set(e);
-			}
-		});
+        LuaNEngine.ENGINE_INTERFACE.setmaxtime(7000);
 
-		thread.start();
-		thread.join();
+        AtomicReference<Throwable> ref = new AtomicReference<>();
+        Thread thread = new Thread(() -> {
+            try {
+                NativeLayerTask threadTask = new NativeLayerTask();
+                threadTask.init(false, false);
+                threadTask.loadAndCallChunk("tests");
+                threadTask.loadAndCallTests(true);
+                threadTask.cleanup();
+                threadTask.cleanupThreadContext();
+            } catch (Throwable e) {
+                ref.set(e);
+            }
+        });
 
-		Throwable e = ref.get();
-		if (e != null) throw e;
+        thread.start();
+        thread.join();
 
-		task.cleanupThreadContext();
+        Throwable e = ref.get();
+        if (e != null) throw e;
 
-		boolean err = false;
+        task.cleanupThreadContext();
 
-		// doing this twice should throw an exception
-		try {
-			task.cleanupThreadContext();
-		}
-		catch (Throwable ex) {
-			NativeLayerTask.stdout.println(
-					"Caught exception: " + ex.getClass().getSimpleName() + ", " + ex.getMessage()
-			);
-			err = true;
-		}
-		if (!err)
-			throw new RuntimeException("cleanupThreadContext() did not error on duplicate call");
-	}
+        boolean err = false;
+
+        // doing this twice should throw an exception
+        try {
+            task.cleanupThreadContext();
+        } catch (Throwable ex) {
+            NativeLayerTask.stdout.println(
+                    "Caught exception: " + ex.getClass().getSimpleName() + ", " + ex.getMessage()
+            );
+            err = true;
+        }
+        if (!err)
+            throw new RuntimeException("cleanupThreadContext() did not error on duplicate call");
+    }
+
 }

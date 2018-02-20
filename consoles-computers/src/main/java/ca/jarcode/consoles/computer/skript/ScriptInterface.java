@@ -11,50 +11,59 @@ import java.util.function.Consumer;
 @SuppressWarnings("unchecked")
 public interface ScriptInterface {
 
-	Object[] FUNCTIONS = new Object[1];
+    Object[] FUNCTIONS = new Object[1];
 
-	ScriptInterface HOOK = new ScriptInterface() {
+    ScriptInterface HOOK = new ScriptInterface() {
 
-		private ScriptInterface underlying = new ScriptInterface() {};
+        private ScriptInterface underlying = new ScriptInterface() {
+        };
 
-		{
-			FUNCTIONS[0] = (Consumer<ScriptInterface>) (inst) -> underlying = inst;
-		}
+        {
+            FUNCTIONS[0] = (Consumer<ScriptInterface>) (inst) -> underlying = inst;
+        }
 
-		@Override
-		public boolean isHooked() {
-			return underlying.isHooked();
-		}
+        @Override
+        public boolean isHooked() {
+            return underlying.isHooked();
+        }
 
-		@Override
-		public void upload(String script, String identifier) {
-			underlying.upload(script, identifier);
-		}
-	};
+        @Override
+        public void upload(String script, String identifier) {
+            underlying.upload(script, identifier);
+        }
 
-	static void set(ScriptInterface inst) {
-		((Consumer<ScriptInterface>) FUNCTIONS[0]).accept(inst);
-	}
+    };
 
-	default boolean isHooked() {
-		return false;
-	}
+    static void set(ScriptInterface inst) {
+        ((Consumer<ScriptInterface>) FUNCTIONS[0]).accept(inst);
+    }
 
-	default void upload(String script, String identifier)  {}
+    default boolean isHooked() {
+        return false;
+    }
 
-	@SuppressWarnings("UnusedDeclaration")
-	class FailedHookException extends Exception {
-		public FailedHookException(String message) {
-			super(message);
-		}
-		public FailedHookException(String message, Throwable cause) {
-			super(message, cause);
-		}
-		public FailedHookException(Throwable cause) {
-			super(cause);
-		}
-		public FailedHookException() {
-			super();
-		}
-	}
+    default void upload(String script, String identifier) {
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    class FailedHookException extends Exception {
+
+        public FailedHookException(String message) {
+            super(message);
+        }
+
+        public FailedHookException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public FailedHookException(Throwable cause) {
+            super(cause);
+        }
+
+        public FailedHookException() {
+            super();
+        }
+
+    }
+
 }

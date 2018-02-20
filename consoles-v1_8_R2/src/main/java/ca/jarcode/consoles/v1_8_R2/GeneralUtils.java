@@ -25,7 +25,6 @@ import java.util.UUID;
 
 public class GeneralUtils implements GeneralInternals {
 
-
 	private final Field ITEM_STACK_HANDLE;
 	private final Constructor ITEM_STACK_CREATE;
 

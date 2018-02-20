@@ -2,20 +2,21 @@ package ca.jarcode.consoles.computers.tests;
 
 import ca.jarcode.ascript.Joint;
 import ca.jarcode.ascript.LibraryCreator;
-import ca.jarcode.ascript.interfaces.*;
+import ca.jarcode.ascript.Script;
+import ca.jarcode.ascript.interfaces.FuncPool;
+import ca.jarcode.ascript.interfaces.ScriptError;
+import ca.jarcode.ascript.interfaces.ScriptGlobals;
+import ca.jarcode.ascript.interfaces.ScriptValue;
+import ca.jarcode.ascript.luanative.LuaNEngine;
+import ca.jarcode.ascript.luanative.LuaNImpl;
 import ca.jarcode.consoles.Computers;
 import ca.jarcode.consoles.computer.NativeLoader;
 import ca.jarcode.consoles.computer.interpreter.FunctionBind;
-import ca.jarcode.ascript.Script;
 import ca.jarcode.consoles.computer.interpreter.PartialFunctionBind;
-import ca.jarcode.ascript.luanative.LuaNEngine;
-
-import ca.jarcode.ascript.luanative.LuaNImpl;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,412 +34,409 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class NativeLayerTask {
 
-	public static boolean DEBUG = "true".equals(System.getProperty("debugTests"));
-	// catch syscall exit exit_group
-	public static String GDB_CMD = Computers.debugHookCommand;
+    public static boolean DEBUG = "true".equals(System.getProperty("debugTests"));
+    // catch syscall exit exit_group
+    public static String GDB_CMD = Computers.debugHookCommand;
 
-	private static final int LOG_TAB = 69;
+    private static final int LOG_TAB = 69;
 
-	private static final String SPLITTER = "+------------------------------------" +
-			"-----------------------------------------+";
-	private static final String DONE = "[DONE]";
-	private static final String FAIL = "[FAIL]";
-	private static final String STARTED = "[STARTED]";
+    private static final String SPLITTER = "+------------------------------------" +
+            "-----------------------------------------+";
+    private static final String DONE = "[DONE]";
+    private static final String FAIL = "[FAIL]";
+    private static final String STARTED = "[STARTED]";
 
-	// getting original stdout, don't want to use JUnit's crap
-	public static final OutputStream out = new FileOutputStream(FileDescriptor.out);
-	public static final PrintStream stdout = new PrintStream(out);
+    // getting original stdout, don't want to use JUnit's crap
+    public static final OutputStream out = new FileOutputStream(FileDescriptor.out);
+    public static final PrintStream stdout = new PrintStream(out);
 
-	Process debuggerProcess;
+    Process debuggerProcess;
 
-	FuncPool<?> pool;
-	ScriptGlobals globals;
-	ScriptValue chunk;
+    FuncPool<?> pool;
+    ScriptGlobals globals;
+    ScriptValue chunk;
 
-	public int loglen = 0;
+    public int loglen = 0;
 
-	static {
-		System.setOut(stdout);
-		LibraryCreator.link(TestLibrary::new, "test_lib", false);
-	}
+    static {
+        System.setOut(stdout);
+        LibraryCreator.link(TestLibrary::new, "test_lib", false);
+    }
 
-	// Discovery: you need to catch errors thrown by the JNI and re-throw them, otherwise strange things
-	// happen. This is probably due to how exceptions are instantiated through the JNI.
-	public void init(boolean sandboxed, boolean install) throws Throwable {
+    // Discovery: you need to catch errors thrown by the JNI and re-throw them, otherwise strange things
+    // happen. This is probably due to how exceptions are instantiated through the JNI.
+    public void init(boolean sandboxed, boolean install) throws Throwable {
 
-		Computers.debug = true;
-		Joint.DEBUG_MODE = true;
+        Computers.debug = true;
+        Joint.DEBUG_MODE = true;
 
-		logs("Setting up engine");
+        logs("Setting up engine");
 
-		File library = null;
+        File library = null;
 
-		try {
-			if (install) {
-				library = new File(
-						System.getProperty("user.dir") + File.separator +
-								"target/natives" + File.separator +
-								NativeLoader.libraryFormat(NativeLoader.getNativeTarget()).apply("computerimpl")
-				);
+        try {
+            if (install) {
+                library = new File(
+                        System.getProperty("user.dir") + File.separator +
+                                "target/natives" + File.separator +
+                                NativeLoader.libraryFormat(NativeLoader.getNativeTarget()).apply("computerimpl")
+                );
 
-				assert library.exists();
-				assert library.isFile();
+                assert library.exists();
+                assert library.isFile();
 
-				System.load(library.getAbsolutePath());
+                System.load(library.getAbsolutePath());
 
-				LuaNEngine.install(sandboxed ? LuaNImpl.JIT : LuaNImpl.JIT_TEST);
+                LuaNEngine.install(sandboxed ? LuaNImpl.JIT : LuaNImpl.JIT_TEST);
 
-				// map a lambda vesion of our test function
-				Script.map(this::$testFunction, "lambdaTestFunction");
-			}
+                // map a lambda vesion of our test function
+                Script.map(this::$testFunction, "lambdaTestFunction");
+            }
 
-			pool = new FuncPool<>(() -> globals, () -> false, null);
+            pool = new FuncPool<>(() -> globals, () -> false, null);
 
-			// register the current thread
-			pool.register(Thread.currentThread());
-		}
-		catch (Throwable e) {
-			throw wrapException(e, true);
-		}
+            // register the current thread
+            pool.register(Thread.currentThread());
+        } catch (Throwable e) {
+            throw wrapException(e, true);
+        }
 
-		logi(DONE);
+        logi(DONE);
 
-		if (DEBUG && install) {
-			// catch syscall exit exit_group
-			debuggerProcess = attachDebugger(library.getAbsolutePath());
-			Thread.sleep(2000);
-		}
+        if (DEBUG && install) {
+            // catch syscall exit exit_group
+            debuggerProcess = attachDebugger(library.getAbsolutePath());
+            Thread.sleep(2000);
+        }
 
-		log("Building new environment");
-		logn(STARTED);
+        log("Building new environment");
+        logn(STARTED);
 
-		StringBuilder loaded = new StringBuilder();
+        StringBuilder loaded = new StringBuilder();
 
-		try {
-			globals = LuaNEngine.newEnvironment(pool, null, System.in, System.out, -1);
+        try {
+            globals = LuaNEngine.newEnvironment(pool, null, System.in, System.out, -1);
 
-			ScriptValue skey, svalue;
+            ScriptValue skey, svalue;
 
-			skey = globals.getValueFactory().translate("testIntegralValue", globals);
-			svalue = globals.getValueFactory().translate(42, globals);
-			
-			globals.set(skey, svalue);
+            skey = globals.getValueFactory().translate("testIntegralValue", globals);
+            svalue = globals.getValueFactory().translate(42, globals);
 
-			skey.release();
-			svalue.release();
+            globals.set(skey, svalue);
 
-			skey = globals.getValueFactory().translate("testIntegralValue", globals);
-			svalue = globals.get(skey);
-			
-			assert svalue.translateInt() == 42;
+            skey.release();
+            svalue.release();
 
-			skey.release();
-			svalue.release();
+            skey = globals.getValueFactory().translate("testIntegralValue", globals);
+            svalue = globals.get(skey);
 
-			pool.mapStaticFunctions();
+            assert svalue.translateInt() == 42;
 
-			// register any lua functions
-			Script.find(this, pool);
+            skey.release();
+            svalue.release();
 
-			loaded.append(pool.functions.entrySet().stream()
-					.map((entry) -> entry.getKey() + ": " + valueString(entry.getValue().getAsValue()))
-					.collect(Collectors.joining(", ")));
+            pool.mapStaticFunctions();
 
-			globals.load(pool);
+            // register any lua functions
+            Script.find(this, pool);
 
-			Script.LIBS.values().stream()
-					.filter((lib) -> !lib.isRestricted || sandboxed)
-					.peek((lib) -> {
-						loaded.append(", ");
-						loaded.append(lib.libraryName);
-						loaded.append(" : ");
-						loaded.append("library");
-					})
-					.forEach(globals::load);
+            loaded.append(pool.functions.entrySet().stream()
+                    .map((entry) -> entry.getKey() + ": " + valueString(entry.getValue().getAsValue()))
+                    .collect(Collectors.joining(", ")));
 
-			if (!sandboxed)
-				globals.removeRestrictions(); // we need extra packages
-		}
-		catch (Throwable e) {
-			throw wrapException(e, false);
-		}
+            globals.load(pool);
 
-		stdout.println("J: loaded: " + loaded);
-	}
+            Script.LIBS.values().stream()
+                    .filter((lib) -> !lib.isRestricted || sandboxed)
+                    .peek((lib) -> {
+                        loaded.append(", ");
+                        loaded.append(lib.libraryName);
+                        loaded.append(" : ");
+                        loaded.append("library");
+                    })
+                    .forEach(globals::load);
 
-	public long getEngineAddress() {
-		return ((LuaNEngine) globals.getEngine()).ptr(globals.value());
-	}
+            if (!sandboxed)
+                globals.removeRestrictions(); // we need extra packages
+        } catch (Throwable e) {
+            throw wrapException(e, false);
+        }
 
-	public static String valueString(ScriptValue value) {
-		if (value.isNull())
-			return "null";
-		else if (value.isFunction())
-			return "function";
-		else if (value.canTranslateString())
-			return "str: '" + value.translateString() + "'";
-		else if (value.canTranslateDouble())
-			return Double.toString(value.translateDouble());
-		else if (value.canTranslateLong())
-			return Long.toString(value.translateLong());
-		else if (value.canTranslateArray())
-			return "table";
-		else if (value.canTranslateBoolean())
-			return "boolean: " + value.translateBoolean();
-		else if (value.canTranslateObj())
-			return "object: " + value.translateObj();
-		else return "?";
-	}
+        stdout.println("J: loaded: " + loaded);
+    }
 
-	public RuntimeException wrapException(Throwable e, boolean failType) {
-		if (failType)
-			logn(FAIL);
-		else stdout.println("TEST: failed during a call or internal error");
-		stdout.println(e.getMessage());
-		stdout.flush();
-		return new RuntimeException(e);
-	}
+    public long getEngineAddress() {
+        return ((LuaNEngine) globals.getEngine()).ptr(globals.value());
+    }
 
-	public void loadAndCallChunk(String test) throws Throwable {
-		
-		try {
-			// load our program into a string
-			String program;
+    public static String valueString(ScriptValue value) {
+        if (value.isNull())
+            return "null";
+        else if (value.isFunction())
+            return "function";
+        else if (value.canTranslateString())
+            return "str: '" + value.translateString() + "'";
+        else if (value.canTranslateDouble())
+            return Double.toString(value.translateDouble());
+        else if (value.canTranslateLong())
+            return Long.toString(value.translateLong());
+        else if (value.canTranslateArray())
+            return "table";
+        else if (value.canTranslateBoolean())
+            return "boolean: " + value.translateBoolean();
+        else if (value.canTranslateObj())
+            return "object: " + value.translateObj();
+        else return "?";
+    }
 
-			File tests = new File(
-					System.getProperty("user.dir") +
-							"/src/test/lua/" + test + ".lua".replace("/", File.separator)
-			);
+    public RuntimeException wrapException(Throwable e, boolean failType) {
+        if (failType)
+            logn(FAIL);
+        else stdout.println("TEST: failed during a call or internal error");
+        stdout.println(e.getMessage());
+        stdout.flush();
+        return new RuntimeException(e);
+    }
 
-			assert tests.exists();
+    public void loadAndCallChunk(String test) throws Throwable {
 
-			try (InputStream is = new FileInputStream(tests)) {
-				byte[] buf = new byte[is.available()];
-				int i;
-				int cursor = 0;
-				while (cursor < buf.length) {
-					int r = buf.length - cursor;
-					cursor += is.read(buf, cursor, 1024 > r ? r : 1024);
-				}
-				program = new String(buf, StandardCharsets.UTF_8);
-			}
+        try {
+            // load our program into a string
+            String program;
 
-			logs("Loading program chunk");
-			logi(STARTED);
-			chunk = globals.load(program, "[test]");
+            File tests = new File(
+                    System.getProperty("user.dir") +
+                            "/src/test/lua/" + test + ".lua".replace("/", File.separator)
+            );
 
-			log("Calling program chunk");
-			logn(STARTED);
-			stdout.print("\n");
-			chunk.call().release();
-			stdout.print("\n");
-		}
-		catch (Throwable e) {
-			throw wrapException(e, false);
-		}
-	}
+            assert tests.exists();
 
-	public void loadAndCallTests(boolean passDirectory) {
+            try (InputStream is = new FileInputStream(tests)) {
+                byte[] buf = new byte[is.available()];
+                int i;
+                int cursor = 0;
+                while (cursor < buf.length) {
+                    int r = buf.length - cursor;
+                    cursor += is.read(buf, cursor, 1024 > r ? r : 1024);
+                }
+                program = new String(buf, StandardCharsets.UTF_8);
+            }
 
-		ScriptValue fkey = null, testFunction = null, result = null, skey = null;
-		
-		try {
-			logs("Indexing test() function");
-			logn(DONE);
-			stdout.print("\n");
-			fkey = globals.getValueFactory().translate("test", globals);
-			testFunction = globals.get(fkey);
-			fkey.release();
-			stdout.print("\n");
+            logs("Loading program chunk");
+            logi(STARTED);
+            chunk = globals.load(program, "[test]");
 
-			logs("Calling test() function");
-			logn(STARTED);
-			stdout.print("\n");
-			
-			if (passDirectory) {
-				skey = globals.getValueFactory().translate(System.getProperty("user.dir"), globals);
-				result = testFunction.getAsFunction().call(skey);
-			}
-			else
-				result = testFunction.call();
+            log("Calling program chunk");
+            logn(STARTED);
+            stdout.print("\n");
+            chunk.call().release();
+            stdout.print("\n");
+        } catch (Throwable e) {
+            throw wrapException(e, false);
+        }
+    }
 
-			stdout.print("\n");
+    public void loadAndCallTests(boolean passDirectory) {
 
-			if (result.canTranslateInt()) {
-				int i = result.translateInt();
-				if (i != 0) {
-					throw new RuntimeException("J: test() return value: " + i);
-				}
-				stdout.println("J: test() return value: " + i);
-			} else {
-				throw new RuntimeException("non-integral response returned from test() lua function");
-			}
-		}
-		catch (ScriptError e) {
-			throw wrapException(e, false);
-		}
-		finally {
-			if (testFunction != null)
-				testFunction.release();
-			if (result != null)
-				result.release();
-			if (skey != null)
-				skey.release();
-		}
-	}
+        ScriptValue fkey, testFunction = null, result = null, skey = null;
 
-	public void cleanupThreadContext() {
-		globals.cleanupThreadContext();
-	}
+        try {
+            logs("Indexing test() function");
+            logn(DONE);
+            stdout.print("\n");
+            fkey = globals.getValueFactory().translate("test", globals);
+            testFunction = globals.get(fkey);
+            fkey.release();
+            stdout.print("\n");
 
-	public void sendToDebugger(String cmd) throws IOException {
-		OutputStream out = debuggerProcess.getOutputStream();
-		debuggerProcess.getOutputStream().write((cmd + "\n").getBytes(StandardCharsets.UTF_8));
-	}
+            logs("Calling test() function");
+            logn(STARTED);
+            stdout.print("\n");
 
-	public void cleanup() throws InterruptedException {
-		if (chunk != null) {
-			chunk.release();
-		}
-		if (globals != null) {
-			globals.close();
-		}
-		if (pool != null) {
-			pool.cleanup();
-		}
+            if (passDirectory) {
+                skey = globals.getValueFactory().translate(System.getProperty("user.dir"), globals);
+                result = testFunction.getAsFunction().call(skey);
+            } else
+                result = testFunction.call();
+
+            stdout.print("\n");
+
+            if (result.canTranslateInt()) {
+                int i = result.translateInt();
+                if (i != 0) {
+                    throw new RuntimeException("J: test() return value: " + i);
+                }
+                stdout.println("J: test() return value: " + i);
+            } else {
+                throw new RuntimeException("non-integral response returned from test() lua function");
+            }
+        } catch (ScriptError e) {
+            throw wrapException(e, false);
+        } finally {
+            if (testFunction != null)
+                testFunction.release();
+            if (result != null)
+                result.release();
+            if (skey != null)
+                skey.release();
+        }
+    }
+
+    public void cleanupThreadContext() {
+        globals.cleanupThreadContext();
+    }
+
+    public void sendToDebugger(String cmd) throws IOException {
+        OutputStream out = debuggerProcess.getOutputStream();
+        debuggerProcess.getOutputStream().write((cmd + "\n").getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void cleanup() throws InterruptedException {
+        if (chunk != null) {
+            chunk.release();
+        }
+        if (globals != null) {
+            globals.close();
+        }
+        if (pool != null) {
+            pool.cleanup();
+        }
 		/*
 		if (debuggerProcess != null && debuggerProcess.isAlive()) {
 			debuggerProcess.destroyForcibly();
 			debuggerProcess.waitFor();
 		}
 		*/
-		// give time for the previous GDB instance to exit
-		if (DEBUG) {
-			Thread.sleep(1000);
-		}
-	}
+        // give time for the previous GDB instance to exit
+        if (DEBUG) {
+            Thread.sleep(1000);
+        }
+    }
 
-	public class Foo {
-		public int foo() {
-			stdout.println("J: Foo#foo() called!");
-			return 42;
-		}
-		public String bar(int x, int y) {
-			stdout.println("J: Foo#bar(int, int) called!");
-			return "0x" + Integer.toHexString(x + y).toUpperCase();
-		}
-	}
+    public class Foo {
 
-	public String[] $stringArray() {
-		return new String[] { "foo", "biz", "bar", "woof" };
-	}
+        public int foo() {
+            stdout.println("J: Foo#foo() called!");
+            return 42;
+        }
 
-	public Foo[] $objectArray() {
-		return new Foo[] { new Foo(), new Foo() };
-	}
+        public String bar(int x, int y) {
+            stdout.println("J: Foo#bar(int, int) called!");
+            return "0x" + Integer.toHexString(x + y).toUpperCase();
+        }
 
-	public int $testIntReturn() {
-		return 42;
-	}
+    }
 
-	public String $testStringReturn() {
-		return "foobar";
-	}
+    public String[] $stringArray() {
+        return new String[] { "foo", "biz", "bar", "woof" };
+    }
 
-	public Foo $newFooObject() {
-		return new Foo();
-	}
+    public Foo[] $objectArray() {
+        return new Foo[] { new Foo(), new Foo() };
+    }
 
-	public String $testFunction(int arg0, String arg1) {
-		stdout.println("J: testFunction sucessfully called from Lua!");
-		return "ret: ('" + arg1 + "', " + arg0 + ")";
-	}
+    public int $testIntReturn() {
+        return 42;
+    }
 
-	public void $setdebug(boolean debug) {
-		Computers.debug = debug;
-	}
+    public String $testStringReturn() {
+        return "foobar";
+    }
 
-	public void $throwSomething() {
-		throw new IllegalStateException("foo");
-	}
+    public Foo $newFooObject() {
+        return new Foo();
+    }
 
-	public void $submitCallback(FunctionBind bind) {
-		assert (Double) bind.call(2, 6) == 8;
-	}
+    public String $testFunction(int arg0, String arg1) {
+        stdout.println("J: testFunction successfully called from Lua!");
+        return "ret: ('" + arg1 + "', " + arg0 + ")";
+    }
 
-	public void $submitPartialCallback(PartialFunctionBind bind) {
-		ScriptValue ret = bind.call(5, 3);
-		assert ret.translateInt() == 8;
-		ret.release();
-	}
+    public void $setdebug(boolean debug) {
+        Computers.debug = debug;
+    }
 
-	public void $submitValueCallback(ScriptValue value) {
-		ScriptValue four = globals.getValueFactory().translate(4, globals);
-		ScriptValue ret = value.getAsFunction().call(four, four);
-		assert ret.translateInt() == 8;
-		ret.release();
-		four.release();
-	}
+    public void $throwSomething() {
+        throw new IllegalStateException("foo");
+    }
 
-	public void logs(String message) {
-		stdout.println(SPLITTER);
-		log(message);
-	}
+    public void $submitCallback(FunctionBind bind) {
+        assert (Double) bind.call(2, 6) == 8;
+    }
 
-	public void log(String message) {
-		stdout.print("| " + message);
-		stdout.flush();
-		loglen += message.length();
-	}
+    public void $submitPartialCallback(PartialFunctionBind bind) {
+        ScriptValue ret = bind.call(5, 3);
+        assert ret.translateInt() == 8;
+        ret.release();
+    }
 
-	public void logn(String message) {
-		logi(message);
-		stdout.println(SPLITTER);
-	}
+    public void $submitValueCallback(ScriptValue value) {
+        ScriptValue four = globals.getValueFactory().translate(4, globals);
+        ScriptValue ret = value.getAsFunction().call(four, four);
+        assert ret.translateInt() == 8;
+        ret.release();
+        four.release();
+    }
 
-	public void logi(String message) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(" ");
-		for (int t = 0; t < LOG_TAB - (loglen + 2) - (message.length() - 6); t++)
-			builder.append(".");
-		builder.append(" ");
-		stdout.print(builder.toString());
-		stdout.println(message + " |");
-		stdout.flush();
-		loglen = 0;
-	}
+    public void logs(String message) {
+        stdout.println(SPLITTER);
+        log(message);
+    }
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private Process attachDebugger(String fullLibraryPath) {
-		String beanName = ManagementFactory.getRuntimeMXBean().getName();
-		if (!beanName.contains("@")) {
-			throw new IllegalStateException("Unable to find process ID to start debug hook");
-		}
-		String sub = beanName.split("@")[0];
-		try {
-			Integer.parseInt(sub);
-		}
-		catch (NumberFormatException e) {
-			throw new IllegalStateException("Unable to parse MX bean to find process ID");
-		}
+    public void log(String message) {
+        stdout.print("| " + message);
+        stdout.flush();
+        loglen += message.length();
+    }
 
-		String command = GDB_CMD;
+    public void logn(String message) {
+        logi(message);
+        stdout.println(SPLITTER);
+    }
 
-		Function<String, String> format = NativeLoader.libraryFormat(NativeLoader.getNativeTarget());
+    public void logi(String message) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(" ");
+        for (int t = 0; t < LOG_TAB - (loglen + 2) - (message.length() - 6); t++)
+            builder.append(".");
+        builder.append(" ");
+        stdout.print(builder.toString());
+        stdout.println(message + " |");
+        stdout.flush();
+        loglen = 0;
+    }
 
-		command = command.replace("%I", sub);
-		command = command.replace("%N", "debug-" + sub);
-		command = command.replace("%E", fullLibraryPath);
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private Process attachDebugger(String fullLibraryPath) {
+        String beanName = ManagementFactory.getRuntimeMXBean().getName();
+        if (!beanName.contains("@")) {
+            throw new IllegalStateException("Unable to find process ID to start debug hook");
+        }
+        String sub = beanName.split("@")[0];
+        try {
+            Integer.parseInt(sub);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Unable to parse MX bean to find process ID");
+        }
 
-		try {
-			log("Starting debug hook");
-			Process process = new ProcessBuilder()
-					.command(command.split(","))
-					.start();
-			logi(DONE);
-			return process;
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to run debug hook command", e);
-		}
-	}
+        String command = GDB_CMD;
+
+        Function<String, String> format = NativeLoader.libraryFormat(NativeLoader.getNativeTarget());
+
+        command = command.replace("%I", sub);
+        command = command.replace("%N", "debug-" + sub);
+        command = command.replace("%E", fullLibraryPath);
+
+        try {
+            log("Starting debug hook");
+            Process process = new ProcessBuilder()
+                    .command(command.split(","))
+                    .start();
+            logi(DONE);
+            return process;
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to run debug hook command", e);
+        }
+    }
+
 }
