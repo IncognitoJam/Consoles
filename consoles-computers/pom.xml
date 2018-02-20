@@ -12,7 +12,11 @@
     <artifactId>consoles-computers</artifactId>
     <version>${global.version}${global.version.suffix}</version>
     <description>Extension to consoles-core, adds programmable computers to a serve as a craftbukkit plugin.</description>
-    
+
+    <properties>
+        <debugTests>true</debugTests>
+    </properties>
+
     <build>
         <resources>
             <!-- plugin YML files and default configs -->
@@ -69,18 +73,18 @@
                             <javahOutputFilePath>${project.build.directory}/include/LuaEngine.h</javahOutputFilePath>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>javah-loader</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>javah</goal>
-                        </goals>
-                        <configuration>
-                            <javahVerbose>true</javahVerbose>
-                            <javahClass>jni.LibLoader</javahClass>
-                            <javahOutputFilePath>${project.build.directory}/include/LibLoader.h</javahOutputFilePath>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>javah-loader</id>-->
+                        <!--<phase>compile</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>javah</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<javahVerbose>true</javahVerbose>-->
+                            <!--<javahClass>jni.LibLoader</javahClass>-->
+                            <!--<javahOutputFilePath>${project.build.directory}/include/LibLoader.h</javahOutputFilePath>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                     <execution>
                         <id>javah-nvalue</id>
                         <phase>compile</phase>
@@ -93,18 +97,18 @@
                             <javahOutputFilePath>${project.build.directory}/include/LuaNScriptValue.h</javahOutputFilePath>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>javah-nfunc</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>javah</goal>
-                        </goals>
-                        <configuration>
-                            <javahVerbose>true</javahVerbose>
-                            <javahClass>ca.jarcode.ascript.luanative.LuaNScriptFunction</javahClass>
-                            <javahOutputFilePath>${project.build.directory}/include/LuaNScriptFunction.h</javahOutputFilePath>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>javah-nfunc</id>-->
+                        <!--<phase>compile</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>javah</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<javahVerbose>true</javahVerbose>-->
+                            <!--<javahClass>ca.jarcode.ascript.luanative.LuaNScriptFunction</javahClass>-->
+                            <!--<javahOutputFilePath>${project.build.directory}/include/LuaNScriptFunction.h</javahOutputFilePath>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                     <execution>
                         <id>javah-nvaluef</id>
                         <phase>compile</phase>
@@ -129,18 +133,18 @@
                             <javahOutputFilePath>${project.build.directory}/include/LuaNFunctionFactory.h</javahOutputFilePath>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>javah-nthreadd</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>javah</goal>
-                        </goals>
-                        <configuration>
-                            <javahVerbose>true</javahVerbose>
-                            <javahClass>ca.jarcode.ascript.luanative.LuaNThreadDatum</javahClass>
-                            <javahOutputFilePath>${project.build.directory}/include/LuaNThreadDatum.h</javahOutputFilePath>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>javah-nthreadd</id>-->
+                        <!--<phase>compile</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>javah</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<javahVerbose>true</javahVerbose>-->
+                            <!--<javahClass>ca.jarcode.ascript.luanative.LuaNThreadDatum</javahClass>-->
+                            <!--<javahOutputFilePath>${project.build.directory}/include/LuaNThreadDatum.h</javahOutputFilePath>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
 
